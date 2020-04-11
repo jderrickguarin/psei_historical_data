@@ -33,7 +33,7 @@ def get_data(URL):
                 response.raise_for_status()
                 page = requests.get(URL)
             except requests.exceptions.HTTPError:
-                print('No data found. Either no trading or wrong ticker.')
+                print(f'No data from {URL}. Either no trading or wrong ticker.')
                 page = None
     except requests.exceptions.ConnectionError:
         print('Check your connection')
@@ -44,10 +44,10 @@ def get_data(URL):
     else:
         data = None
 
-    print(data, type(data))
+    print(data)
     return data
 
-# Process json data with nested data and returns a clean dict
+# Process json data with nested data and returns a clean dict. Specific only to format from PSEi API
 def parse_data(data):
     if data != None:
         data_dict = {}
@@ -67,7 +67,7 @@ def parse_data(data):
         return data_dict
     else: return data
 
-# Expects a date string of form "mm-dd-yyyy" and can return a tuple of date objects or strings
+# Expects a date string of form "yyyy-mm-dd" and can return a tuple of date objects or strings
 def get_dates(start, end = dt.date.today(), dateObject = False):
     if end == None:
         end = dt.date.today()
@@ -95,7 +95,7 @@ def get_dates(start, end = dt.date.today(), dateObject = False):
         return fstart, fend
 
 # Returns a list of valid trading dates from start to end. Returns either DateTimeIndex or list of strings
-def get_datelist(start, end=None, DateTimeIndex = False):
+def get_datelist(start, end=None, DateTimeIndex = False, dateObject = False):
     date_extr = get_dates(start, end)
     nstart = date_extr[0]
     nend = date_extr[1]
@@ -110,7 +110,7 @@ def get_datelist(start, end=None, DateTimeIndex = False):
             datelist.append(strdate)
         return datelist
 
-def generate_df(ticker, start, end=None, csv = False):
+def generate_df(ticker, start, end=None, csv = False, dateObject = False):
     datelist = get_datelist(start, end)
     histprices_list = []
     for date in datelist:
@@ -135,4 +135,5 @@ def generate_csv(ticker, start, end=None, fileName = 'data.csv'):
     # Do not just convert dataframe to csv, instead manually loop through all data and input as comma separated values
     pass
 
-print(generate_df('JFC', '3-2-2020', csv = True))
+if __name__ == "__main__":
+    generate_df('JFC', '3-2-2020', csv = True)
